@@ -21,9 +21,6 @@ bool sentFlag = false;
 bool sentPrompt = false;
 bool streamPulses = false;
 
-#define SERIALCOMMAND_DEBUG
-
-
 void setup() {
 
   int i;
