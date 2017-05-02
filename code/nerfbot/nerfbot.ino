@@ -10,9 +10,7 @@ int versionMinor = 1;
 
 SerialCommand sCmd;     // The demo SerialCommand object
 
-
-
-PololuQik2s12v10 qik(10, 11, 13);
+PololuQik2s12v10 qik(10, 11, 14);
 
 int channelPins[8];
 unsigned long pulses[8];
@@ -39,13 +37,17 @@ void setup() {
   sCmd.addCommand("stream", cmdStream);
   sCmd.addCommand("stopstream", cmdStopStream);
   sCmd.addCommand("resetm", cmdResetMotor);
+  sCmd.addCommand("motore", cmdGetMotorError);
   
-  sCmd.setDefaultHandler(unrecognized);      // Handler for command that isn't matched  (says "What?")
+  sCmd.setDefaultHandler(unrecognized);     
+
+  pinMode(15, INPUT);
+  
   
   Serial.begin(9600);
   Serial.println("NerfBot");
   Serial.println("qik 2s12v10 dual serial motor controller");
-  qik.init();  
+  cmdResetMotor();
  // Serial.print("Firmware version: ");
  // Serial.println(qik.getFirmwareVersion());
   Serial.println();
@@ -154,5 +156,15 @@ void cmdResetMotor () {
 
 }
 
+bool getMotorError() {  
+  return digitalRead(15);mo
+}
 
+void cmdGetMotorError() {
+  bool state;
+  if(getMotorError) {Serial.println("\tMOTOR ERROR Triggered!");}
+  else {Serial.println("\tNO ERROR");}
+  sendPrompt();
+
+}
 
