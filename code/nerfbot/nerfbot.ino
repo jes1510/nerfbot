@@ -8,6 +8,8 @@
 int versionMajor = 0;
 int versionMinor = 1;
 
+int motorErrorPin = 15;
+
 SerialCommand sCmd;     // The demo SerialCommand object
 
 PololuQik2s12v10 qik(10, 11, 14);
@@ -21,6 +23,19 @@ bool sentFlag = false;
 bool sentPrompt = false;
 bool streamPulses = false;
 
+//
+//struct Command {
+//  char cmd;
+//  void funct;  
+//};
+//
+//void cmdVer(void);
+//
+//struct Commands {
+//  Command c1{"ver", cmdVer};
+//};
+//
+//Commands commands;
 void setup() {
 
   int i;
@@ -30,11 +45,12 @@ void setup() {
   }
 
   sCmd.addCommand("ver", cmdVer);
+//  sCmd.addCommand(commands.c1.cmd, commands.c1.funct);
   sCmd.addCommand("pulses", cmdShowPulses);
   sCmd.addCommand("stream", cmdStream);
   sCmd.addCommand("stopstream", cmdStopStream);
   sCmd.addCommand("resetm", cmdResetMotor);
-  sCmd.addCommand("motore", cmdGetMotorError);
+  sCmd.addCommand("readerror", cmdGetMotorError);
   
   sCmd.setDefaultHandler(unrecognized);     
 
@@ -48,6 +64,7 @@ void setup() {
  // Serial.print("Firmware version: ");
  // Serial.println(qik.getFirmwareVersion());
   Serial.println();
+//  Serial.print(commands.c1.cmd);
 }
 
 void loop() {
@@ -66,6 +83,13 @@ void loop() {
 
   qik.setM0Speed(remap(pulses[0]));
   qik.setM1Speed(remap(pulses[1]));
+  if(digitalRead(motorErrorPin)==HIGH) {   
+      Serial.println("\n\tMOTOR ERROR!");
+      cmdResetMotor();
+      sendPrompt();
+      delay(250);    
+  }
+  
 
 }
 
@@ -88,7 +112,7 @@ void sendPrompt() {
   if(!quiet) {
     char line[16];
     sprintf(line, "Nerfbot %i.%i> ", versionMajor, versionMinor);
-    Serial.print(line);
+    Serial.println(line);
     sentPrompt = true;
   }
 }
@@ -150,18 +174,16 @@ void cmdResetMotor () {
   delay(250);
   qik.init();
   sendPrompt();
-
 }
 
 bool getMotorError() {  
-  return digitalRead(15);mo
+  return digitalRead(15);
 }
 
 void cmdGetMotorError() {
-  bool state;
-  if(getMotorError) {Serial.println("\tMOTOR ERROR Triggered!");}
-  else {Serial.println("\tNO ERROR");}
-  sendPrompt();
-
+ // bool state;
+ Serial.print("\tError Byte:");
+ Serial.println(qik.getErrors(), HEX);
+ sendPrompt();
 }
 
