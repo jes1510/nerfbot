@@ -38,14 +38,16 @@ void setup() {
   sCmd.addCommand("pulses", cmdShowPulses);
   sCmd.addCommand("stream", cmdStream);
   sCmd.addCommand("stopstream", cmdStopStream);
+  sCmd.addCommand("resetm", cmdResetMotor);
+  
   sCmd.setDefaultHandler(unrecognized);      // Handler for command that isn't matched  (says "What?")
   
   Serial.begin(9600);
   Serial.println("NerfBot");
   Serial.println("qik 2s12v10 dual serial motor controller");
   qik.init();  
-  Serial.print("Firmware version: ");
-  Serial.println(qik.getFirmwareVersion());
+ // Serial.print("Firmware version: ");
+ // Serial.println(qik.getFirmwareVersion());
   Serial.println();
 }
 
@@ -62,7 +64,6 @@ void loop() {
   }
 
   if (streamPulses) printPulses();
-  //else {Serial.println("timeout");}
 
   qik.setM0Speed(remap(pulses[0]));
   qik.setM1Speed(remap(pulses[1]));
@@ -82,8 +83,6 @@ void printPulses() {
   sprintf(line, "\tCH1: %lu  CH2: %lu  CH3: %lu  CH4: %lu  CH5: %lu  CH6: %lu  CH7: %lu  CH8: %lu", 
               pulses[0], pulses[1], pulses[2], pulses[3], pulses[4], pulses[5], pulses[6], pulses[7]);
   Serial.println(line);
- // sendPrompt();
-
 }
 
 void sendPrompt() {
@@ -142,6 +141,16 @@ void cmdStopStream() {
 unsigned long remap(unsigned long pulse) {
   pulse = constrain(pulse, 980, 1900);
   return map(pulse, 980, 1900, -127, 127);
+
+}
+
+void cmdResetMotor () {
+  digitalWrite(14, LOW);
+  delay(500);
+  digitalWrite(14, HIGH);
+  delay(250);
+  qik.init();
+  sendPrompt();
 
 }
 
