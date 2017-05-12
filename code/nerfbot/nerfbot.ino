@@ -38,6 +38,8 @@ bool sentFlag = false;
 bool sentPrompt = false;
 bool streamPulses = false;
 
+int channel = 0;
+
 void setup() {
   int i;
   int pin;
@@ -49,7 +51,7 @@ void setup() {
     pulses[i] = 0;  
   }
 
-  
+  pinMode(3, INPUT);
 
   sCmd.addCommand("ver", cmdVer);
   sCmd.addCommand("pulses", cmdShowPulses);
@@ -72,15 +74,18 @@ void setup() {
 
   display.begin(SSD1306_SWITCHCAPVCC);
   display.display();
-  delay(2000);
+  delay(500);
   display.clearDisplay();
 
-  // Clear the buffer.
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  readPulses();
+  //readPulses();
+
+  readPulse(channel);
+  channel++;
+  if(channel > 1) channel = 0;
     
  // if (pulses[0] == 0) Serial.println("ERROR!");
   
@@ -155,21 +160,40 @@ unsigned long fixedPulsein(int pin, int timeout) {
     pulse = pulseIn(pin, HIGH);
 
     if (millis() - start > timeout) {
- 
+      Serial.print("Pin: ");
+      Serial.print(pin);
+      Serial.println("\t---> TIMEOUT!");
       break;
     }
   }
   return pulse;
 }
 
+void readPulse(int channel) {
+  unsigned long pulse;
+  pulse = fixedPulsein(channelPins[channel], 25);
+  pulses[channel] = pulse;
+  Serial.print(channel);
+  Serial.print(": ");
+  Serial.println(pulse);
+  Serial.println();
+}
+
 void readPulses() {
-  int i = 0;
+  int i;
   unsigned long pulse =0;
   int start = millis();
-  pulse = fixedPulsein(channelPins[i], 50);
+  for (i=0; i<2; i++){  
+    pulse = fixedPulsein(channelPins[i], 50);
 
  // Serial.print(millis() - start);
   pulses[i] = pulse;
+  Serial.print("Channel: ");
+  Serial.print(i);
+  Serial.print("\t\tPulse: ");
+  Serial.println(pulse);
+  Serial.println(); 
+  }
  // Serial.print("\t");
 //  Serial.println(pulse); 
 }
