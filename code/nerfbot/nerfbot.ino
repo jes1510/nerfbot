@@ -29,7 +29,7 @@ SerialCommand sCmd;     // The demo SerialCommand object
 
 //PololuQik2s12v10 qik(16, 17, 14);
 
-int channelPins[8];
+//int channelPins[8];
 unsigned long pulses[8];
 
 bool quiet = false;
@@ -40,14 +40,17 @@ bool streamPulses = false;
 
 int channel = 0;
 
+int channelPins[] = {2,4,5,6,7,8,9};
+
 void setup() {
   int i;
   int pin;
+ //disableDebugPorts();
   
-  for (i=0; i<8; i++){
-    pin = i + 2;
-    channelPins[i] = pin;  // Pulses are on Pins D2-D9
-    pinMode(pin, INPUT);
+  for (i=0; i<7; i++){
+   // pin = i + 2;
+   // channelPins[i] = pin;  // Pulses are on Pins D2-D9
+    pinMode(channelPins[i], INPUT);
     pulses[i] = 0;  
   }
 
@@ -80,15 +83,8 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  //readPulses();
 
-  readPulse(channel);
-  channel++;
-  if(channel > 1) channel = 0;
-    
- // if (pulses[0] == 0) Serial.println("ERROR!");
-  
+  readPulses();
 
   if(!sentPrompt) {
     sendPrompt();
@@ -113,6 +109,9 @@ void loop() {
   
 
 }
+
+
+
 
 int pulseToBar(unsigned long pulse) {
   pulse = constrain(pulse, 980, 1900);
@@ -144,7 +143,6 @@ void displayPulses() {
     else {
       int topBar, loc;
       topBar = map(bar, 0, 15, 15, 0);
-      if (i==0) Serial.println(topBar);
       loc = 35-(topBar);
       display.fillRect(i * 16 + 4, 35-topBar, 6, topBar , color%2);
     }
@@ -156,13 +154,16 @@ void displayPulses() {
 unsigned long fixedPulsein(int pin, int timeout) {
   int start = millis();
   unsigned long pulse = 0;
+  int elapsed = 0;
   while (pulse == 0) {
-    pulse = pulseIn(pin, HIGH);
-
-    if (millis() - start > timeout) {
-      Serial.print("Pin: ");
-      Serial.print(pin);
-      Serial.println("\t---> TIMEOUT!");
+    pulse = pulseIn(pin, HIGH, 25000);
+    elapsed = millis() - start;
+    if (elapsed > timeout) {
+//      Serial.print("pin: ");
+//      Serial.print(pin);
+//      Serial.print("\t\t");
+//      Serial.print(elapsed);
+//      Serial.println("\t---> TIMEOUT!");
       break;
     }
   }
@@ -173,26 +174,27 @@ void readPulse(int channel) {
   unsigned long pulse;
   pulse = fixedPulsein(channelPins[channel], 25);
   pulses[channel] = pulse;
-  Serial.print(channel);
-  Serial.print(": ");
-  Serial.println(pulse);
-  Serial.println();
+//  Serial.print(channel);
+//  Serial.print(": ");
+//  Serial.println(pulse);
+//  Serial.println();
 }
 
 void readPulses() {
   int i;
   unsigned long pulse =0;
   int start = millis();
-  for (i=0; i<2; i++){  
-    pulse = fixedPulsein(channelPins[i], 50);
+  for (i=0; i<8; i++){  
+    pulse = fixedPulsein(channelPins[i], 30);
+   // pulse = pulseIn(channelPins[i], 30000);
 
  // Serial.print(millis() - start);
   pulses[i] = pulse;
-  Serial.print("Channel: ");
-  Serial.print(i);
-  Serial.print("\t\tPulse: ");
-  Serial.println(pulse);
-  Serial.println(); 
+//  Serial.print("Channel: ");
+//  Serial.print(i);
+//  Serial.print("\t\tPulse: ");
+//  Serial.println(pulse);
+//  Serial.println(); 
   }
  // Serial.print("\t");
 //  Serial.println(pulse); 
