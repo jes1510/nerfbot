@@ -1,4 +1,7 @@
 #include <SerialCommand.h>
+#include "motorDriver.h";
+
+
 SerialCommand sCmd;     // The demo SerialCommand object
 
 
@@ -11,6 +14,9 @@ void cmdGetMotorError();
 void unrecognized(const char *command);
 void printPulses();
 void cmdDebug();
+void cmdInvert1();
+void cmdInvert2();
+void printMotorStats();
 
 extern bool quiet;
 extern bool echo;
@@ -24,7 +30,8 @@ extern int VERSION_MINOR;
 extern unsigned long pulses[8];
 extern unsigned long fixedPulsein(int pin, int timeout);
 
-
+extern Motor motor2;
+extern Motor motor1;
 
 
 void cmdInit() {
@@ -35,6 +42,10 @@ void cmdInit() {
   sCmd.addCommand("resetm", cmdResetMotor);
   sCmd.addCommand("readerror", cmdGetMotorError);
   sCmd.addCommand("debug", cmdDebug);  
+  sCmd.addCommand("invert1", cmdInvert1);  
+  sCmd.addCommand("invert2", cmdInvert2); 
+  sCmd.addCommand("stats", printMotorStats);
+  
   sCmd.setDefaultHandler(unrecognized);     
 }
 
@@ -150,5 +161,50 @@ void cmdGetMotorError() {
  Serial.print("\tError Byte:");
 // Serial.println(qik.getErrors(), HEX);
  sendPrompt();
+}
+
+void cmdInvert1() {
+  int number;
+  char *arg;
+  arg = sCmd.next();
+  number = atoi(arg);
+
+  if (number==1) invertM1(true);  
+  else invertM1(false);   
+  
+}
+
+void cmdInvert2() {
+  int number;
+  char *arg;
+  arg = sCmd.next();
+  number = atoi(arg);
+
+  if (number==1) invertM2(true);  
+  else invertM1(false);   
+  
+}
+
+void printMotorStats() {
+  int number;
+  char *arg;
+  char line[32];
+  arg = sCmd.next();
+  number = atoi(arg); 
+  struct Motor* pMotor ;
+  
+  if (number == 1) pMotor = &motor1;
+  else if (number == 2) pMotor = &motor2;
+  else {
+    Serial.println("\t Error: Invalid Motor Number");
+    sendPrompt();  
+    return;
+  }
+  sprintf(line, "\tMotor: %d  Spd: %d  Dir: %i  Inv: %i ", number, 
+                                                           pMotor->speed, 
+                                                           pMotor->direction, 
+                                                           pMotor->inverted);
+  Serial.println(line);
+  sendPrompt();
 }
 

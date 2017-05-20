@@ -3,7 +3,10 @@
 
 //#include <SoftwareSerial.h>
 //#include <PololuQik.h>
+#include "motorDriver.h";
 
+
+struct buff;
 
 int  VERSION_MAJOR = 0;
 int  VERSION_MINOR = 1;
@@ -11,9 +14,11 @@ int  VERSION_MINOR = 1;
 int motorErrorPin = 15;
 
 
-//PololuQik2s12v10 qik(16, 17, 14);
+//PololuQik2s12v10 qik(PA10, PA9, 14);
+//PololuQik2s12v10 qik(2, 8, 14);
 
-//int channelPins[8];
+extern Motor motor1;
+extern Motor motor2;
 
 unsigned long pulses[8];
 
@@ -26,7 +31,7 @@ bool debug = false;
 
 int channel = 0;
 
-int channelPins[] = {2,4,5,6,7,8,9};
+int channelPins[] = {4,5,6,7,9};
 
 extern void cmdResetMotor();
 extern void lcdInit();
@@ -41,15 +46,16 @@ void readPulses();
 void setup() {
   int i;
   int pin;
-  
+
   for (i=0; i<7; i++){
     pinMode(channelPins[i], INPUT);
+//pinMode(PC10, OUTPUT);
     pulses[i] = 0;  
   }
 
-
-  pinMode(15, INPUT);  
-    
+  
+  Serial1.begin (9600);
+ 
   Serial.begin(9600);
   Serial.println("NerfBot");
   Serial.println("qik 2s12v10 dual serial motor controller");
@@ -59,13 +65,17 @@ void setup() {
   Serial.println();
   lcdInit();
   cmdInit();
+  motorInit(15, 16, 17,  18);
   
 
 }
 
 void loop() {
 
+ // Serial1.println("Serial 1");
+//  Serial2.println("Ser 2");
   readPulses();
+ // Serial.println("Test!!!");
 
   if(!sentPrompt) {
     sendPrompt();
@@ -74,10 +84,13 @@ void loop() {
   if(Serial.available()) {
     readCMD();
   }
-     
-  if (streamPulses) printPulses();
 
-  displayPulses();
+
+
+     
+ // if (streamPulses) printPulses();
+
+    displayPulses();
 
 //  qik.setM0Speed(remap(pulses[0]));
 //  qik.setM1Speed(remap(pulses[1]));
@@ -110,7 +123,7 @@ void readPulses() {
   int i;
   unsigned long pulse =0;
   int start = millis();
-  for (i=0; i<8; i++){  
+  for (i=0; i<6; i++){  
     pulse = fixedPulsein(channelPins[i], 30);
 
   if (debug)  {  
