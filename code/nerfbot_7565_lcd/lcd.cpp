@@ -1,4 +1,7 @@
 #include "ST7565.h"
+#include "motorDriver.h";
+#include <SerialCommand.h>
+
 
 //int ledPin =  13;    // LED connected to digital pin 13
 
@@ -14,11 +17,19 @@ ST7565 display(12, 13, 11, 18, 10);
 
 #define LOGO16_GLCD_HEIGHT 16 
 #define LOGO16_GLCD_WIDTH  16 
+#define TOPLINE 4
 
 extern unsigned long pulses[8];
 extern unsigned long  fixedPulsein(int pin, int timeout);
+extern Motor motor2;
+extern Motor motor1;
+extern SerialCommand sCmd;
 
-
+enum LCDPages {
+  motorStats,
+  rxPulses,
+  traffic,
+};
 
 
 int pulseToBar(unsigned long pulse) {
@@ -35,7 +46,7 @@ void lcdInit() {
 
 void displayPulses() {
   display.clear();
-  display.drawstring(32, 4, "Receiver");
+  display.drawstring(32, TOPLINE, "Receiver");
   display.drawline(0, 0, 127, 0, BLACK);
   
   int i;
@@ -54,5 +65,47 @@ void displayPulses() {
     } 
   }
     display.display();
+}
+
+
+void displayStats() {
+  display.clear();
+  display.drawstring(32, TOPLINE, "Motor Status");
+    display.drawline(0, 42, 127, 42, BLACK);
+  char line[32];
+  char label[16];
+  int i;
+  struct Motor* pMotor ;
+
+  for (i=0; i<2; i++) {
+    if (i == 0) pMotor = &motor1;
+    else if (i == 1) pMotor = &motor2; 
+    sprintf(line, "M:%d S:%d  D:%i  I:%i ", i + 1, 
+                                                             pMotor->speed, 
+                                                             pMotor->direction, 
+                                                            pMotor->inverted);
+    sprintf(label, "Motor %d", i);
+  //display.drawstring(0, 5 + i, "label");
+  display.drawstring(0, 6 + i, line);
+  }
+  display.display();
+ 
+}
+
+void trafficMonitor() {
+  display.clear();
+  display.drawstring(20, 4, "Serial Traffic");
+  display.drawline(0, 42, 127, 42, BLACK);
+  display.drawstring(0, 6, sCmd.publicBuffer);
+  //Serial.println(sCmd.publicBuffer);
+  display.display();
+
+}
+
+
+void manageLCD(int displayPage) {
+    if (displayPage == motorStats) displayStats();
+    if (displayPage == rxPulses) displayPulses();
+    if (displayPage == traffic) trafficMonitor();
 }
 

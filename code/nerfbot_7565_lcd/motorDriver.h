@@ -3,7 +3,7 @@
 struct Motor {
   int PWMPin;
   int directionPin;
-  int speed = 0;
+  int speed = 255;
   int direction = 1;
   bool inverted = false;
 };

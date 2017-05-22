@@ -13,10 +13,6 @@ int  VERSION_MINOR = 1;
 
 int motorErrorPin = 15;
 
-
-//PololuQik2s12v10 qik(PA10, PA9, 14);
-//PololuQik2s12v10 qik(2, 8, 14);
-
 extern Motor motor1;
 extern Motor motor2;
 
@@ -40,8 +36,11 @@ extern void readCMD();
 extern void printPulses();
 extern void displayPulses();
 extern void cmdInit();
+extern void displayStats();
+extern void trafficMonitor();
+extern void manageLCD(int page);
 
-void readPulses();
+int displayPage = 2;
 
 void setup() {
   int i;
@@ -49,19 +48,11 @@ void setup() {
 
   for (i=0; i<7; i++){
     pinMode(channelPins[i], INPUT);
-//pinMode(PC10, OUTPUT);
     pulses[i] = 0;  
   }
-
   
-  Serial1.begin (9600);
- 
   Serial.begin(9600);
-  Serial.println("NerfBot");
-  Serial.println("qik 2s12v10 dual serial motor controller");
-  cmdResetMotor();
- // Serial.print("Firmware version: ");
- // Serial.println(qik.getFirmwareVersion());
+  Serial.println("STM32 Smart Motor Controller");
   Serial.println();
   lcdInit();
   cmdInit();
@@ -71,11 +62,7 @@ void setup() {
 }
 
 void loop() {
-
- // Serial1.println("Serial 1");
-//  Serial2.println("Ser 2");
   readPulses();
- // Serial.println("Test!!!");
 
   if(!sentPrompt) {
     sendPrompt();
@@ -85,22 +72,7 @@ void loop() {
     readCMD();
   }
 
-
-
-     
- // if (streamPulses) printPulses();
-
-    displayPulses();
-
-//  qik.setM0Speed(remap(pulses[0]));
-//  qik.setM1Speed(remap(pulses[1]));
-//  if(digitalRead(motorErrorPin)==HIGH) {   
-//      Serial.println("\n\tMOTOR ERROR!");
-//      cmdResetMotor();
-//      sendPrompt();
-//      delay(250);    
- // }
-  
+  manageLCD(displayPage);
 
 }
 
@@ -147,6 +119,7 @@ void readPulses() {
 }
 
 
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
 
 
 

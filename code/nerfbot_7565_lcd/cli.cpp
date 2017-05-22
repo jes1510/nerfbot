@@ -102,7 +102,6 @@ void cmdStream() {
   int number;
   char *arg;
   arg = sCmd.next();
-
   number = atoi(arg);
 
   if (number == 1) {
@@ -112,8 +111,7 @@ void cmdStream() {
   else {
     streamPulses = false; 
     sendPrompt();
-    }
-  
+    }  
 }
 
 
@@ -148,7 +146,7 @@ void printPulses() {
 }
 
 void readCMD() {
-         sCmd.readSerial(); 
+         sCmd.readSerial();          
 }
 
 
@@ -188,7 +186,7 @@ void cmdInvert2() {
 void printMotorStats() {
   int number;
   char *arg;
-  char line[32];
+  char line[64];
   arg = sCmd.next();
   number = atoi(arg); 
   struct Motor* pMotor ;
