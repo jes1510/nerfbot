@@ -1,68 +1,50 @@
+#include <Arduino.h>
+#include "lcd.h";
+#include "cli.h";
+#include <SerialCommand.h>
+#include "platform.h"
 
 // Requires serial command library:  https://github.com/kroimon/Arduino-SerialCommand
 
-//#include <SoftwareSerial.h>
-//#include <PololuQik.h>
+
 #include "motorDriver.h";
+#include "nerfbot.h";
 
+int VERSION_MAJOR = 0;
+int VERSION_MINOR = 1;
 
-struct buff;
+int displayPage = motorStats;
+int driveMode = serial;
 
-int  VERSION_MAJOR = 0;
-int  VERSION_MINOR = 1;
+extern int channelPins[];
 
-int motorErrorPin = 15;
-
-extern Motor motor1;
-extern Motor motor2;
-
-unsigned long pulses[8];
-
-bool quiet = false;
-bool echo = true;
-bool sentFlag = false;
-bool sentPrompt = false;
-bool streamPulses = false;
-bool debug = false;
-
-int channel = 0;
-
-int channelPins[] = {4,5,6,7,9};
-
-extern void cmdResetMotor();
-extern void lcdInit();
-extern void sendPrompt();
-extern void readCMD();
-extern void printPulses();
-extern void displayPulses();
-extern void cmdInit();
-extern void displayStats();
-extern void trafficMonitor();
-extern void manageLCD(int page);
-
-int displayPage = 2;
 
 void setup() {
   int i;
   int pin;
 
-  for (i=0; i<7; i++){
-    pinMode(channelPins[i], INPUT);
-    pulses[i] = 0;  
-  }
+//  for (i=0; i<7; i++){
+ //   pinMode(channelPins[i], INPUT);
+ //   pulses[i] = 0;  
+ // }
   
   Serial.begin(9600);
   Serial.println("STM32 Smart Motor Controller");
   Serial.println();
   lcdInit();
   cmdInit();
-  motorInit(15, 16, 17,  18);
+  
+  motorInit(M1PWMPIN, M1DIRPIN, M2PWMPIN, M2DIRPIN);  // 1PWM, 1DIR, 2PWM, 2DIR
+
+  pinMode(5, OUTPUT);
+  
   
 
 }
 
 void loop() {
-  readPulses();
+
+ // readPulses();
 
   if(!sentPrompt) {
     sendPrompt();
@@ -73,8 +55,17 @@ void loop() {
   }
 
   manageLCD(displayPage);
+ // setM1(1, 64);
+ // setM2(1, 64);
+ updateMotor1();
+ updateMotor2();
+
+digitalWrite(3, HIGH);
+
+
 
 }
+
 
 
 

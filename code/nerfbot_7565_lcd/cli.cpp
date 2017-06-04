@@ -1,37 +1,10 @@
-#include <SerialCommand.h>
+#include "cli.h";
 #include "motorDriver.h";
-
+#include <SerialCommand.h>
 
 SerialCommand sCmd;     // The demo SerialCommand object
 
 
-void cmdVer();
-void cmdShowPulses();
-void cmdStream();
-void cmdStopStream();
-void cmdResetMotor();
-void cmdGetMotorError();
-void unrecognized(const char *command);
-void printPulses();
-void cmdDebug();
-void cmdInvert1();
-void cmdInvert2();
-void printMotorStats();
-
-extern bool quiet;
-extern bool echo;
-extern bool sentFlag;
-extern bool sentPrompt;
-extern bool streamPulses;
-extern bool debug;
-
-extern int VERSION_MAJOR;
-extern int VERSION_MINOR;
-extern unsigned long pulses[8];
-extern unsigned long fixedPulsein(int pin, int timeout);
-
-extern Motor motor2;
-extern Motor motor1;
 
 
 void cmdInit() {
@@ -41,12 +14,13 @@ void cmdInit() {
   sCmd.addCommand("stopstream", cmdStopStream);
   sCmd.addCommand("resetm", cmdResetMotor);
   sCmd.addCommand("readerror", cmdGetMotorError);
-  sCmd.addCommand("debug", cmdDebug);  
-  sCmd.addCommand("invert1", cmdInvert1);  
-  sCmd.addCommand("invert2", cmdInvert2); 
+  sCmd.addCommand("debug", cmdDebug);
+  sCmd.addCommand("invert1", cmdInvert1);
+  sCmd.addCommand("invert2", cmdInvert2);
   sCmd.addCommand("stats", printMotorStats);
-  
-  sCmd.setDefaultHandler(unrecognized);     
+  sCmd.addCommand("motor1", cmdMotor1);
+  sCmd.addCommand("motor2", cmdMotor2);
+  sCmd.setDefaultHandler(unrecognized);
 }
 
 
@@ -60,7 +34,7 @@ void sendPrompt() {
   }
 }
 
-void cmdVer() {  
+void cmdVer() {
   char line[16];
   sprintf(line, "\tVersion: %i.%i", VERSION_MAJOR, VERSION_MINOR);
   Serial.println(line);
@@ -91,33 +65,33 @@ void cmdDebug() {
   }
   else {
     debug = false;
-    Serial.println("Debug Mode DISABLED");    
+    Serial.println("Debug Mode DISABLED");
   }
 }
-  
 
 
 
-void cmdStream() { 
+
+void cmdStream() {
   int number;
   char *arg;
   arg = sCmd.next();
   number = atoi(arg);
 
   if (number == 1) {
-    streamPulses = true; 
+    streamPulses = true;
   }
 
   else {
-    streamPulses = false; 
+    streamPulses = false;
     sendPrompt();
-    }  
+    }
 }
 
 
-  
-void cmdStopStream() { 
-  streamPulses = false; 
+
+void cmdStopStream() {
+  streamPulses = false;
   sendPrompt();
   }
 
@@ -140,17 +114,17 @@ void cmdResetMotor () {
 void printPulses() {
   int i;
   char line[128];
-  sprintf(line, "\tCH1: %lu  CH2: %lu  CH3: %lu  CH4: %lu  CH5: %lu  CH6: %lu  CH7: %lu  CH8: %lu", 
+  sprintf(line, "\tCH1: %lu  CH2: %lu  CH3: %lu  CH4: %lu  CH5: %lu  CH6: %lu  CH7: %lu  CH8: %lu",
               pulses[0], pulses[1], pulses[2], pulses[3], pulses[4], pulses[5], pulses[6], pulses[7]);
   Serial.println(line);
 }
 
 void readCMD() {
-         sCmd.readSerial();          
+         sCmd.readSerial();
 }
 
 
-bool getMotorError() {  
+bool getMotorError() {
   return digitalRead(15);
 }
 
@@ -167,9 +141,10 @@ void cmdInvert1() {
   arg = sCmd.next();
   number = atoi(arg);
 
-  if (number==1) invertM1(true);  
-  else invertM1(false);   
-  
+  if (number==1) invertM1(true);
+  else invertM1(false);
+  sendPrompt();
+
 }
 
 void cmdInvert2() {
@@ -178,9 +153,11 @@ void cmdInvert2() {
   arg = sCmd.next();
   number = atoi(arg);
 
-  if (number==1) invertM2(true);  
-  else invertM1(false);   
-  
+  if (number==1) invertM2(true);
+  else invertM1(false);
+  Serial.println(number);
+  sendPrompt();
+
 }
 
 void printMotorStats() {
@@ -188,21 +165,62 @@ void printMotorStats() {
   char *arg;
   char line[64];
   arg = sCmd.next();
-  number = atoi(arg); 
+  number = atoi(arg);
   struct Motor* pMotor ;
-  
+
   if (number == 1) pMotor = &motor1;
   else if (number == 2) pMotor = &motor2;
   else {
     Serial.println("\t Error: Invalid Motor Number");
-    sendPrompt();  
+    sendPrompt();
     return;
   }
-  sprintf(line, "\tMotor: %d  Spd: %d  Dir: %i  Inv: %i ", number, 
-                                                           pMotor->speed, 
-                                                           pMotor->direction, 
+  
+  sprintf(line, "\tMotor: %d  Spd: %d  Dir: %i  Inv: %i ", number,
+                                                           pMotor->speed,
+                                                           pMotor->direction,
                                                            pMotor->inverted);
   Serial.println(line);
   sendPrompt();
+}
+
+void cmdMotor1() {
+  int spd, dir; 
+  char *arg1, *arg2;
+
+  arg1 = sCmd.next();
+  arg2 = sCmd.next();
+
+  spd = atoi(arg1);
+  dir = atoi(arg2);  
+
+  setM1(dir, spd);   
+  
+  char line[32];
+  sprintf(line, "Motor1   Speed: %d    Dir: %d", spd, dir);  
+  Serial.println(line);
+  sendPrompt();
+  
+}
+
+
+void cmdMotor2() {
+  int spd, dir; 
+  char *arg1, *arg2;
+
+  arg1 = sCmd.next();
+  arg2 = sCmd.next();
+
+  spd = atoi(arg1);
+  dir = atoi(arg2);  
+
+  setM2(dir, spd);  
+ 
+  
+  char line[32];
+  sprintf(line, "Motor2   Speed: %d    Dir: %d", spd, dir);  
+  Serial.println(line);
+  sendPrompt();
+  
 }
 

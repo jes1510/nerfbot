@@ -1,9 +1,12 @@
+#ifndef _motorDriver
+#define _motorDriver
+
 #include <Arduino.h>
 
 struct Motor {
   int PWMPin;
   int directionPin;
-  int speed = 255;
+  int speed = 128;
   int direction = 1;
   bool inverted = false;
 };
@@ -14,3 +17,12 @@ void setM1(int dir, int pwm);
 void setM2(int dir, int pwm);
 void invertM1(bool val);
 void invertM2(bool val);
+void updateMotor1(void);
+void updateMotor2(void);
+
+
+extern int gunRelay;
+
+
+
+#endif
