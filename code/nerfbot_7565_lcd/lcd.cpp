@@ -77,6 +77,11 @@ void displayStats() {
   //display.drawstring(0, 5 + i, "label");
   display.drawstring(0, 6 + i, line);
   }
+
+  sprintf(line, "Accel Timer: %d", accelTimer);
+  display.drawstring(0, 8, line);
+  sprintf(line, "Accel Steps: %d", accelSteps);
+  display.drawstring(0, 9, line);
   display.display();
 
 }
