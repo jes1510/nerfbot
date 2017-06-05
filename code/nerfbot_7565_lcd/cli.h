@@ -2,10 +2,7 @@
 #define _cli
 
 #include <SerialCommand.h>
-#include "motorDriver.h";
-
-
-
+#include "motorDriver.h"
 
 extern Motor motor1;
 extern Motor motor2;
@@ -24,6 +21,7 @@ void cmdInvert2();
 void printMotorStats();
 void cmdMotor1();
 void cmdMotor2();
+
 
 
 extern bool quiet;
@@ -55,5 +53,10 @@ void cmdInvert1();
 void cmdInvert2();
 void printMotorStats();
 void readCMD();
+void cmdSetExpo();
+void cmdSetLinear();
+void cmdSetAccel();
+void cmdGetAccel();
+
 
 #endif

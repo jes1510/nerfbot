@@ -16,7 +16,9 @@ int VERSION_MINOR = 1;
 int displayPage = motorStats;
 int driveMode = serial;
 
-extern int channelPins[];
+unsigned long currentTime = millis();
+unsigned long lastTime = millis();
+
 
 
 void setup() {
@@ -57,6 +59,8 @@ void loop() {
   manageLCD(displayPage);
  // setM1(1, 64);
  // setM2(1, 64);
+
+ 
  updateMotor1();
  updateMotor2();
 
@@ -111,7 +115,6 @@ void readPulses() {
 
 
 void(* resetFunc) (void) = 0; //declare reset function @ address 0
-
 
 
 unsigned long fixedPulsein(int pin, int timeout) {

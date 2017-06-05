@@ -40,7 +40,19 @@ enum driveModes {
 
 //Platform
 
+extern int accelSteps;
+extern int decelSteps;
+extern int accelMs;
+extern int decelMs;
 
+
+extern int M1TargetSpeed;
+extern int M2TargetSpeed;
+extern int M1CurrentSpeed;
+extern int M2CurrentSpeed;
+
+
+extern int channelPins[];
 
 
 

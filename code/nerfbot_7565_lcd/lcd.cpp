@@ -1,8 +1,8 @@
 #include <ST7565.h>
-#include "motorDriver.h";
-#include "lcd.h";
-#include "cli.h";
-#include "platform.h";
+#include "motorDriver.h"
+#include "lcd.h"
+#include "cli.h"
+#include "platform.h"
 
 extern SerialCommand sCmd;     // The demo SerialCommand object
 
@@ -70,7 +70,7 @@ void displayStats() {
     if (i == 0) pMotor = &motor1;
     else if (i == 1) pMotor = &motor2;
     sprintf(line, "M:%d S:%d  D:%i  I:%i ", i + 1,
-                                                             pMotor->speed,
+                                                             pMotor->targetSpeed,
                                                              pMotor->direction,
                                                             pMotor->inverted);
     sprintf(label, "Motor %d", i);

@@ -1,6 +1,8 @@
 #ifndef _platform
 #define _platform
 
+// General pin definitions for various bit of hardware
+
 // Motor Control Pins
 #define M1PWMPIN PB10
 #define M1DIRPIN PC12
@@ -27,6 +29,7 @@
 #define LCDRESET  18
 #define NSS	 	  10
 
+// display modes
 #define LCDMODE0 PB2
 #define LCDMODE1 PB15
 #define LCDMODE2 PB14

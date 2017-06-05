@@ -1,10 +1,8 @@
-#include "cli.h";
-#include "motorDriver.h";
+#include "cli.h"
+#include "motorDriver.h"
 #include <SerialCommand.h>
 
 SerialCommand sCmd;     // The demo SerialCommand object
-
-
 
 
 void cmdInit() {
@@ -20,6 +18,10 @@ void cmdInit() {
   sCmd.addCommand("stats", printMotorStats);
   sCmd.addCommand("motor1", cmdMotor1);
   sCmd.addCommand("motor2", cmdMotor2);
+  sCmd.addCommand("setLinear", cmdSetLinear);
+  sCmd.addCommand("setExpo", cmdSetExpo);
+  sCmd.addCommand("setAccel", cmdSetAccel);
+  sCmd.addCommand("getAccel", cmdGetAccel);
   sCmd.setDefaultHandler(unrecognized);
 }
 
@@ -177,7 +179,7 @@ void printMotorStats() {
   }
   
   sprintf(line, "\tMotor: %d  Spd: %d  Dir: %i  Inv: %i ", number,
-                                                           pMotor->speed,
+                                                           pMotor->targetSpeed,
                                                            pMotor->direction,
                                                            pMotor->inverted);
   Serial.println(line);
@@ -214,13 +216,49 @@ void cmdMotor2() {
   spd = atoi(arg1);
   dir = atoi(arg2);  
 
-  setM2(dir, spd);  
- 
+  setM2(dir, spd);   
   
   char line[32];
   sprintf(line, "Motor2   Speed: %d    Dir: %d", spd, dir);  
   Serial.println(line);
   sendPrompt();
   
+}
+
+void cmdSetExpo() {
+  accelerationMode = expo;
+  Serial.print("\tAcceleration Mode is now: ");
+  Serial.println(accelerationMode);
+  sendPrompt();
+}
+
+void cmdSetLinear() {
+  accelerationMode = linear;
+  Serial.print("\tAcceleration Mode is now: ");
+  Serial.println(accelerationMode);
+  sendPrompt();
+}
+
+void cmdSetAccel() {
+  int timer, steps; 
+  char *arg1, *arg2;
+
+  arg1 = sCmd.next();
+  arg2 = sCmd.next();
+
+  timer = atoi(arg1);
+  steps = atoi(arg2);  
+
+  updateAccel(timer, steps);  
+  sendPrompt();
+  
+}
+
+void cmdGetAccel() {
+  int i;
+  char line[128];
+  sprintf(line, "\tAcceleration settings ->  Timer: %d    Steps: %d", accelTimer, accelSteps);
+  Serial.println(line);
+  sendPrompt();
 }
 
