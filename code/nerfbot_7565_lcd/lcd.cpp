@@ -66,6 +66,7 @@ void displayStats() {
   int i;
   struct Motor* pMotor ;
 
+  
   for (i=0; i<2; i++) {
     if (i == 0) pMotor = &motor1;
     else if (i == 1) pMotor = &motor2;
@@ -78,11 +79,19 @@ void displayStats() {
   display.drawstring(0, 6 + i, line);
   }
 
-  sprintf(line, "Accel Timer: %d", accelTimer);
-  display.drawstring(0, 8, line);
-  sprintf(line, "Accel Steps: %d", accelSteps);
-  display.drawstring(0, 9, line);
+    
+  if (accelerationMode == linear) sprintf(line, "Accel Mode: %s", "Linear");
+  if (accelerationMode == expo) sprintf(line, "Accel Mode: %s", "Expo");
+
+  display.drawstring(0, 1, line);
+  if (accelerationMode == linear) {  
+    sprintf(line, "Accel Timer: %d", accelTimer);
+    display.drawstring(0, 2, line);
+    sprintf(line, "Accel Steps: %d", accelSteps);
+    display.drawstring(0, 3, line);
+  }
   display.display();
+  
 
 }
 

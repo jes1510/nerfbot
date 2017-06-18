@@ -5,9 +5,11 @@
 
 // Motor Control Pins
 #define M1PWMPIN PB10
-#define M1DIRPIN PC12
+#define M1DIR1PIN PC10
+#define M1DIR2PIN PC12
 #define M2PWMPIN PC7
-#define M2DIRPIN PC10
+#define M2DIR1PIN PA13
+#define M2DIR2PIN PA14
 
 // RC Receiver
 #define CH0PIN 4
@@ -26,14 +28,16 @@
 #define MOSI 	  12
 #define SCK	 	  13
 #define A0	 	  11
-#define LCDRESET  18
+#define LCDRESET  PB7
 #define NSS	 	  10
 
 // display modes
 #define LCDMODE0 PB2
-#define LCDMODE1 PB15
-#define LCDMODE2 PB14
-#define	LCDMODE3 PB13
+#define LCDMODE1 PB1
+#define LCDMODE2 PB15
+#define LCDMODE3 PB14
+#define	LCDMODE4 PB13
+#define LCDMODE4 PC4
 
 
 #endif

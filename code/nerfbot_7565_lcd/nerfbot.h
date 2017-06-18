@@ -21,12 +21,12 @@ unsigned long pulses[8];
 
 
 // Flags for state machines
-bool quiet = false;
+//bool quiet = false;
 bool echo = true;
 bool sentFlag = false;
 bool sentPrompt = false;
 bool streamPulses = false;
-bool debug = false;
+//bool debug = false;
 
 int channel = 0;
 //int channelPins[] = {CH0Pin, CH1Pin, CH2Pin, CH3Pin};

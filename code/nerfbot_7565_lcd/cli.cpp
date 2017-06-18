@@ -3,6 +3,7 @@
 #include <SerialCommand.h>
 
 SerialCommand sCmd;     // The demo SerialCommand object
+int cliMode = ackOnly;
 
 
 void cmdInit() {
@@ -10,30 +11,34 @@ void cmdInit() {
   sCmd.addCommand("pulses", cmdShowPulses);
   sCmd.addCommand("stream", cmdStream);
   sCmd.addCommand("stopstream", cmdStopStream);
-  sCmd.addCommand("resetm", cmdResetMotor);
   sCmd.addCommand("readerror", cmdGetMotorError);
-  sCmd.addCommand("debug", cmdDebug);
   sCmd.addCommand("invert1", cmdInvert1);
   sCmd.addCommand("invert2", cmdInvert2);
   sCmd.addCommand("stats", printMotorStats);
   sCmd.addCommand("motor1", cmdMotor1);
   sCmd.addCommand("motor2", cmdMotor2);
-  sCmd.addCommand("setLinear", cmdSetLinear);
-  sCmd.addCommand("setExpo", cmdSetExpo);
-  sCmd.addCommand("setAccel", cmdSetAccel);
+  sCmd.addCommand("setlinear", cmdSetLinear);
+  sCmd.addCommand("setexpo", cmdSetExpo);
+  sCmd.addCommand("setaccel", cmdSetAccel);
   sCmd.addCommand("getAccel", cmdGetAccel);
+  sCmd.addCommand("stop1", cmdMotor1Stop);
+  sCmd.addCommand("stop2", cmdMotor2Stop);
+  sCmd.addCommand("speed", cmdSetSpeed);
   sCmd.setDefaultHandler(unrecognized);
 }
 
 
 
 void sendPrompt() {
-  if(!quiet) {
+  if(cliMode == interactive) {
     char line[16];
     sprintf(line, "Nerfbot %i.%i> ", VERSION_MAJOR, VERSION_MINOR);
     Serial.println(line);
-    sentPrompt = true;
+    
   }
+
+  else Serial.println("OK");
+  sentPrompt = true;
 }
 
 void cmdVer() {
@@ -50,26 +55,30 @@ void cmdShowPulses() {
 
 // This gets set as the default handler, and gets called when no other command matches.
 void unrecognized(const char *command) {
-  Serial.print("\tUNKNOWN COMMAND: ");
-  Serial.println(command);
-  sendPrompt();
+  if (cliMode == interactive) {
+    Serial.print("\tUNKNOWN COMMAND: ");
+    Serial.println(command);
+    sendPrompt();
+  }
+
+  else Serial.println("ERROR");
 }
 
-void cmdDebug() {
-  int number;
-  char *arg;
-  arg = sCmd.next();
-  number = atoi(arg);
-  Serial.print(number);
-  if (number == 1)  {
-    debug = true;
-    Serial.println("Debug Mode ENABLED!");
-  }
-  else {
-    debug = false;
-    Serial.println("Debug Mode DISABLED");
-  }
-}
+//void cmdDebug() {
+//  int number;
+//  char *arg;
+//  arg = sCmd.next();
+//  number = atoi(arg);
+//  Serial.print(number);
+//  if (number == 1)  {
+//    debug = true;
+//    Serial.println("Debug Mode ENABLED!");
+//  }
+//  else {
+//    debug = false;
+//    Serial.println("Debug Mode DISABLED");
+//  }
+//}
 
 
 
@@ -103,14 +112,6 @@ unsigned long remap(unsigned long pulse) {
 
 }
 
-void cmdResetMotor () {
-  digitalWrite(14, LOW);
-  delay(500);
-  digitalWrite(14, HIGH);
-  delay(250);
-//  qik.init();
-  sendPrompt();
-}
 
 
 void printPulses() {
@@ -157,7 +158,7 @@ void cmdInvert2() {
 
   if (number==1) invertM2(true);
   else invertM1(false);
-  Serial.println(number);
+  //Serial.println(number);
   sendPrompt();
 
 }
@@ -198,9 +199,12 @@ void cmdMotor1() {
 
   setM1(dir, spd);   
   
-  char line[32];
-  sprintf(line, "Motor1   Speed: %d    Dir: %d", spd, dir);  
-  Serial.println(line);
+  char line[32];  
+
+  if (cliMode == debug) {
+    sprintf(line, "Motor1   Speed: %d    Dir: %d", spd, dir);  
+    Serial.println(line);
+  }
   sendPrompt();
   
 }
@@ -219,23 +223,30 @@ void cmdMotor2() {
   setM2(dir, spd);   
   
   char line[32];
-  sprintf(line, "Motor2   Speed: %d    Dir: %d", spd, dir);  
-  Serial.println(line);
+  if (cliMode == debug) {
+    sprintf(line, "Motor2   Speed: %d    Dir: %d", spd, dir);  
+    Serial.println(line);
+  }
   sendPrompt();
   
 }
 
 void cmdSetExpo() {
   accelerationMode = expo;
-  Serial.print("\tAcceleration Mode is now: ");
-  Serial.println(accelerationMode);
+
+  if (cliMode == debug) {
+    Serial.print("\tAcceleration Mode is now: ");
+    Serial.println(accelerationMode);
+  }
   sendPrompt();
 }
 
 void cmdSetLinear() {
   accelerationMode = linear;
-  Serial.print("\tAcceleration Mode is now: ");
-  Serial.println(accelerationMode);
+  if (cliMode == debug ) {
+    Serial.print("\tAcceleration Mode is now: ");
+    Serial.println(accelerationMode);
+  }
   sendPrompt();
 }
 
@@ -260,5 +271,36 @@ void cmdGetAccel() {
   sprintf(line, "\tAcceleration settings ->  Timer: %d    Steps: %d", accelTimer, accelSteps);
   Serial.println(line);
   sendPrompt();
+}
+
+void setCLIMode(int mode) {
+  
+}
+
+void cmdMotor1Stop() {
+   setMotor1Speed(0);
+   sendPrompt();
+
+}
+
+void cmdMotor2Stop() {
+  setMotor2Speed(0);
+  sendPrompt();
+}
+
+void cmdSetSpeed() {
+  int motor, pwm;
+  char *arg1, *arg2;
+
+  arg1 = sCmd.next();
+  arg2 = sCmd.next();
+
+  motor = atoi(arg1);
+  pwm = atoi(arg2);  
+
+  if(motor == 1) setMotor1Speed(0);
+  if(motor == 2) setMotor2Speed(0);
+  
+  
 }
 

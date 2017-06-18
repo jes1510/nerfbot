@@ -18,16 +18,23 @@ int accelSteps = 25;
 int accelerationMode = linear; 
 
 // 1PWM, 1DIR, 2PWM, 2DIR
-void motorInit(int motor1PWMPin, int motor1DirPin, int motor2PWMPin, int motor2DirPin) {    
+void motorInit(int motor1PWMPin, int motor1Dir1Pin, int motor1Dir2Pin, int motor2PWMPin, int motor2Dir1Pin, int motor2Dir2Pin) {    
   motor1.PWMPin = motor1PWMPin;
-  motor1.directionPin = motor1DirPin;
+  motor1.direction1Pin = motor1Dir1Pin;
+  motor1.direction2Pin = motor1Dir2Pin;
   motor2.PWMPin = motor2PWMPin;
-  motor2.directionPin = motor2DirPin;
+  motor2.direction1Pin = motor2Dir1Pin;
+  motor2.direction2Pin = motor2Dir2Pin;
+
 
   pinMode (motor1.PWMPin, OUTPUT);
-  pinMode (motor1.directionPin, OUTPUT);
+  pinMode (motor1.direction1Pin, OUTPUT);
+  pinMode (motor1.direction2Pin, OUTPUT);
+
   pinMode (motor2.PWMPin, OUTPUT);
-  pinMode (motor2.directionPin, OUTPUT);  
+  pinMode (motor2.direction1Pin, OUTPUT);  
+  pinMode (motor2.direction2Pin, OUTPUT);  
+
 }
 
 
@@ -35,9 +42,10 @@ void setM1(int dir, int pwm) {
   if (pwm > 252) pwm = 252;
   motor1.targetSpeed = pwm;
   motor1.direction = dir;  
-  analogWrite(motor1.PWMPin, pwm); 
+//  analogWrite(motor1.PWMPin, pwm); 
   if(motor1.inverted == true) dir = dir * -1;
-  digitalWrite(motor1.directionPin, dir);  
+  digitalWrite(motor1.direction1Pin, dir);  
+  digitalWrite(motor1.direction2Pin, ~dir);  
 }
 
 
@@ -45,9 +53,11 @@ void setM2(int dir, int pwm) {
   if (pwm > 252) pwm = 252;  
   motor2.targetSpeed = pwm;
   motor2.direction = dir;  
-  analogWrite(motor2.PWMPin, pwm); 
+//  analogWrite(motor2.PWMPin, pwm); 
   if(motor2.inverted == true) dir = dir * -1;
-  digitalWrite(motor2.directionPin, dir);
+  digitalWrite(motor2.direction1Pin, dir);
+  digitalWrite(motor2.direction2Pin, ~dir); 
+
   
 }
 
@@ -62,7 +72,9 @@ void invertM2(bool val) {
 
 void updateMotor1(void) {
   motor1.targetSpeed = constrain(motor1.targetSpeed, 0, 252);  
-  digitalWrite(motor1.directionPin, motor1.direction); 
+  digitalWrite(motor1.direction1Pin, motor1.direction); 
+    digitalWrite(motor1.direction2Pin, ~motor1.direction); 
+
   if (millis() - motor1.timer > accelTimer) {
     
     if (motor1.targetSpeed > motor1.currentSpeed) {
@@ -94,7 +106,8 @@ void updateMotor1(void) {
 
 void updateMotor2(void) {
   motor2.targetSpeed = constrain(motor2.targetSpeed, 0, 252);  
-  digitalWrite(motor2.directionPin, motor2.direction); 
+  digitalWrite(motor2.direction1Pin, motor2.direction); 
+  digitalWrite(motor2.direction2Pin, ~motor2.direction); 
   if (millis() - motor2.timer > accelTimer) {
     
     if (motor2.targetSpeed > motor2.currentSpeed) {
@@ -135,4 +148,11 @@ void updateAccel(int timer, int steps) {
   accelSteps = steps;
 }
 
+void setMotor1Speed(int pwm) {
+  motor1.targetSpeed = pwm;
+}
+
+void setMotor2Speed(int pwm) {
+  motor2.targetSpeed = pwm;
+}
 

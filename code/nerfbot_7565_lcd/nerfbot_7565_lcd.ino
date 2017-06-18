@@ -35,10 +35,10 @@ void setup() {
   Serial.println();
   lcdInit();
   cmdInit();
-  
-  motorInit(M1PWMPIN, M1DIRPIN, M2PWMPIN, M2DIRPIN);  // 1PWM, 1DIR, 2PWM, 2DIR
 
-  pinMode(5, OUTPUT);
+  motorInit(M1PWMPIN, M1DIR1PIN, M1DIR2PIN, M2PWMPIN, M2DIR1PIN, M2DIR2PIN);  // 1PWM, 1DIR, 2PWM, 2DIR
+
+
   
   
 
@@ -47,7 +47,7 @@ void setup() {
 void loop() {
 
  // readPulses();
-
+//  digitalWrite(PB7, HIGH);
   if(!sentPrompt) {
     sendPrompt();
   }
@@ -57,17 +57,9 @@ void loop() {
   }
 
   manageLCD(displayPage);
- // setM1(1, 64);
- // setM2(1, 64);
-
- 
+   
  updateMotor1();
  updateMotor2();
-
-digitalWrite(3, HIGH);
-
-
-
 }
 
 

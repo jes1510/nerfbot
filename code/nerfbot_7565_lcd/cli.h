@@ -4,6 +4,15 @@
 #include <SerialCommand.h>
 #include "motorDriver.h"
 
+enum cliModes {
+  interactive,
+  quiet,
+  ackOnly,
+  debug
+};
+
+extern int cliMode;
+
 extern Motor motor1;
 extern Motor motor2;
 
@@ -11,7 +20,6 @@ void cmdVer();
 void cmdShowPulses();
 void cmdStream();
 void cmdStopStream();
-void cmdResetMotor();
 void cmdGetMotorError();
 void unrecognized(const char *command);
 void printPulses();
@@ -21,15 +29,18 @@ void cmdInvert2();
 void printMotorStats();
 void cmdMotor1();
 void cmdMotor2();
+void cmdMotor1Stop();
+void cmdMotor2Stop();
 
 
 
-extern bool quiet;
+
+//extern bool quiet;
 extern bool echo;
 extern bool sentFlag;
 extern bool sentPrompt;
 extern bool streamPulses;
-extern bool debug;
+//extern bool debug;
 
 extern int VERSION_MAJOR;
 extern int VERSION_MINOR;
@@ -41,7 +52,7 @@ void sendPrompt();
 void cmdVer();
 void cmdShowPulses();
 void unrecognized(const char *command);
-void cmdDebug();
+//void cmdDebug();
 void cmdStream();
 void cmdStopStream();
 unsigned long remap(unsigned long pulse);
@@ -57,6 +68,8 @@ void cmdSetExpo();
 void cmdSetLinear();
 void cmdSetAccel();
 void cmdGetAccel();
+void cmdSetSteps();
+void cmdSetSpeed();
 
 
 #endif
