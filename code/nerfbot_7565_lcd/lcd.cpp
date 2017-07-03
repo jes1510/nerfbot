@@ -1,8 +1,9 @@
 #include <ST7565.h>
-#include "motorDriver.h"
+
 #include "lcd.h"
 #include "cli.h"
 #include "platform.h"
+#include <avr/dtostrf.h>
 
 extern SerialCommand sCmd;     // The demo SerialCommand object
 
@@ -19,6 +20,8 @@ extern SerialCommand sCmd;     // The demo SerialCommand object
 // pin 10 - LCD chip select (CS)
 
 ST7565 display(MOSI, SCK, A0, LCDRESET, NSS);
+int cursorX = 0;
+int cursorY = 0;
 
 
 int pulseToBar(unsigned long pulse) {
@@ -57,57 +60,49 @@ void displayPulses() {
 }
 
 
-void displayStats() {
-  display.clear();
-  display.drawstring(32, TOPLINE, "Motor Status");
-    display.drawline(0, 42, 127, 42, BLACK);
-  char line[32];
-  char label[16];
-  int i;
-  struct Motor* pMotor ;
-
-  
-  for (i=0; i<2; i++) {
-    if (i == 0) pMotor = &motor1;
-    else if (i == 1) pMotor = &motor2;
-    sprintf(line, "M:%d S:%d  D:%i  I:%i ", i + 1,
-                                                             pMotor->targetSpeed,
-                                                             pMotor->direction,
-                                                            pMotor->inverted);
-    sprintf(label, "Motor %d", i);
-  //display.drawstring(0, 5 + i, "label");
-  display.drawstring(0, 6 + i, line);
-  }
-
-    
-  if (accelerationMode == linear) sprintf(line, "Accel Mode: %s", "Linear");
-  if (accelerationMode == expo) sprintf(line, "Accel Mode: %s", "Expo");
-
-  display.drawstring(0, 1, line);
-  if (accelerationMode == linear) {  
-    sprintf(line, "Accel Timer: %d", accelTimer);
-    display.drawstring(0, 2, line);
-    sprintf(line, "Accel Steps: %d", accelSteps);
-    display.drawstring(0, 3, line);
-  }
-  display.display();
-  
-
-}
-
 void trafficMonitor() {
   display.clear();
   display.drawstring(20, 4, "Serial Traffic");
   display.drawline(0, 42, 127, 42, BLACK);
   display.drawstring(0, 6, sCmd.publicBuffer);
-  //Serial.println(sCmd.publicBuffer);
   display.display();
 
 }
 
 
 void manageLCD(int displayPage) {
-    if (displayPage == motorStats) displayStats();
     if (displayPage == rxPulses) displayPulses();
     if (displayPage == traffic) trafficMonitor();
+    if (displayPage == netPage) displayNetwork();
 }
+
+
+void setCursor(int x, int y) {
+  cursorX = x;
+  cursorY = y;
+}
+
+void print(char &message) {
+
+
+}
+
+void displayNetwork() {
+  char line[16];  
+  char voltStr[6];
+  
+  display.clear();
+  display.drawstring(30, 4, "Networking");
+  display.drawline(0, 42, 127, 42, BLACK);
+  display.drawstring(4, 6, "IP: ");
+  display.drawstring(24, 6, IP);
+  display.drawstring(4, 7, "Wii: ");
+  display.drawstring(35, 7, wiiStatus); 
+  dtostrf(batteryVoltage, 2, 1, voltStr);
+  sprintf(line, "Battery: %sv", voltStr);
+  display.drawstring(4, 1, line);  
+  display.display();
+  
+}
+
+

@@ -1,30 +1,32 @@
 #include <Arduino.h>
 #include "lcd.h";
 #include "cli.h";
-#include <SerialCommand.h>
+#include <SerialCommand.h>  // Requires serial command library:  https://github.com/kroimon/Arduino-SerialCommand
 #include "platform.h"
-
-// Requires serial command library:  https://github.com/kroimon/Arduino-SerialCommand
-
-
-#include "motorDriver.h";
+#include <RunningAverage.h>  // Found here:  https://playground.arduino.cc/Main/RunningAverage
 #include "nerfbot.h";
 
 int VERSION_MAJOR = 0;
 int VERSION_MINOR = 1;
 
-int displayPage = motorStats;
+int displayPage = netPage;
 int driveMode = serial;
+float batteryVoltage;
+int adcBatVal;
 
 unsigned long currentTime = millis();
 unsigned long lastTime = millis();
 
 
 
+RunningAverage battRA(50);
+int samples = 0;
+
 void setup() {
   int i;
   int pin;
 
+  pinMode(A0, INPUT);
 //  for (i=0; i<7; i++){
  //   pinMode(channelPins[i], INPUT);
  //   pulses[i] = 0;  
@@ -35,19 +37,14 @@ void setup() {
   Serial.println();
   lcdInit();
   cmdInit();
-
-  motorInit(M1PWMPIN, M1DIR1PIN, M1DIR2PIN, M2PWMPIN, M2DIR1PIN, M2DIR2PIN);  // 1PWM, 1DIR, 2PWM, 2DIR
-
-
-  
-  
+  battRA.clear();
 
 }
 
 void loop() {
 
  // readPulses();
-//  digitalWrite(PB7, HIGH);
+
   if(!sentPrompt) {
     sendPrompt();
   }
@@ -55,11 +52,19 @@ void loop() {
   if(Serial.available()) {
     readCMD();
   }
+  
+  battRA.addValue(analogRead(A1));
+  batteryVoltage = battRA.getAverage() / 45.4302;
+  Serial.println(batteryVoltage);
 
-  manageLCD(displayPage);
-   
- updateMotor1();
- updateMotor2();
+  if (samples == 50) {
+    samples = 0;
+    battRA.clear();
+  }
+ 
+  manageLCD(displayPage);  
+  
+
 }
 
 
@@ -106,7 +111,7 @@ void readPulses() {
 }
 
 
-void(* resetFunc) (void) = 0; //declare reset function @ address 0
+
 
 
 unsigned long fixedPulsein(int pin, int timeout) {

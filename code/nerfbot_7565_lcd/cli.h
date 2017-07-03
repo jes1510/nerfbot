@@ -2,7 +2,9 @@
 #define _cli
 
 #include <SerialCommand.h>
-#include "motorDriver.h"
+
+extern char IP[16];
+extern char wiiStatus[16];
 
 enum cliModes {
   interactive,
@@ -13,27 +15,21 @@ enum cliModes {
 
 extern int cliMode;
 
-extern Motor motor1;
-extern Motor motor2;
-
 void cmdVer();
 void cmdShowPulses();
 void cmdStream();
 void cmdStopStream();
-void cmdGetMotorError();
+
 void unrecognized(const char *command);
 void printPulses();
 void cmdDebug();
-void cmdInvert1();
-void cmdInvert2();
-void printMotorStats();
-void cmdMotor1();
-void cmdMotor2();
-void cmdMotor1Stop();
-void cmdMotor2Stop();
 
-
-
+void cmdCursor();
+void cmdPrint();
+void cmdIP();
+void cmdPage();
+void cmdWiiStatus();
+void cmdBattery();
 
 //extern bool quiet;
 extern bool echo;
@@ -46,30 +42,22 @@ extern int VERSION_MAJOR;
 extern int VERSION_MINOR;
 extern unsigned long pulses[8];
 extern unsigned long fixedPulsein(int pin, int timeout);
+extern float batteryVoltage;
 
 void cmdInit();
 void sendPrompt();
 void cmdVer();
 void cmdShowPulses();
 void unrecognized(const char *command);
-//void cmdDebug();
 void cmdStream();
 void cmdStopStream();
 unsigned long remap(unsigned long pulse);
-void cmdResetMotor();
+
 void printPulses();
 bool getMotorError();
-void cmdGetMotorError();
-void cmdInvert1();
-void cmdInvert2();
-void printMotorStats();
+
 void readCMD();
-void cmdSetExpo();
-void cmdSetLinear();
-void cmdSetAccel();
-void cmdGetAccel();
-void cmdSetSteps();
-void cmdSetSpeed();
+
 
 
 #endif
